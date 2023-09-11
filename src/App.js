@@ -3,7 +3,6 @@ import "./App.css";
 import Header from "./header";
 
 
-
 const phoneBook = [
   { name: "Mashood Ali", number: "+923318822203" },
   { name: "Abdul Rehman", number: "+923234044700" },
@@ -11,13 +10,15 @@ const phoneBook = [
 ];
 
 const App = () => {
+  //state to hold the array f contacts
   const [contacts, setContacts] = useState(phoneBook);
-  const [master,setMaster]=useState(phoneBook);
+  
   const [showForm, setShowForm] = useState(false);
+  
+  //state to hold the phonenumber to be edited
   const [toBeEdited,setToBeEdited]=useState("");
  
-
-
+  //state to hold the value of the name and phone numbe to be edited or added
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -25,12 +26,18 @@ const App = () => {
   // 2 for add
   const [operation, setOperation] = useState(0);
 
+  const [query,setQuery]= useState("");
+
+  
+
+
+  //sorting of the contacts in ascending order
   useEffect(() => {
     contacts.sort(compare)
     setContacts([...contacts])
   }, [])
 
-  //comparing the name in the object
+  //comparing function to help sorting
   function compare(a, b) {
     if (a.name.toLowerCase() < b.name.toLowerCase()) {
       return -1;
@@ -41,11 +48,12 @@ const App = () => {
     return 0;
   }
 
-  //function called at the button click add contact
+  //function add contact
   const addContact = () => {
     // console.log("button click");
     if (name === "" || phoneNumber === "") {
-      // console.log("Please enter the required fields");
+      alert("Please enter the required fields");
+      setOperation(1);
     }
     else {
       //appending new contact to the contacts array using the spread operator and calling sort function
@@ -53,8 +61,9 @@ const App = () => {
       setShowForm(false);
       setName("");
       setPhoneNumber("");
+      setOperation(0);
     }
-    setOperation(0);
+    
   }
 
   function editContact(e) {
@@ -89,42 +98,18 @@ const App = () => {
   }
 
 
-  function handleSearch(event) {
-    // console.log(event.target.value);
-    // setinput(event.target.value);
-    try {
-      if (event.target.value.toLowerCase() !== "") {
-        const newArray = contacts.filter((el) => {
-          return (el.name.toLowerCase().includes(event.target.value.toLowerCase()))
-        });
-        // console.log(newArray)
-        setContacts(newArray);
-      }
-      else{
-        setContacts(master);
-      }
-    } catch (error) {
-      // console.log(error)
-    }
-  }
-
-
   function deleteContact(e) {
     // console.log(e.target.id);
     for (let i = 0; i < contacts.length; i++) {
       if (contacts[i].number === e.target.id) {
         // console.log("The value of i = ", i);
         contacts.splice(i, 1);
-
         setContacts([...contacts]);
-
         return
       }
     }
   }
-  function saveCopy(){
-    setMaster(contacts);
-  }
+ 
 
 
 
@@ -135,21 +120,18 @@ const App = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-4"></div>
-
           <div className="col-md-4">
             <div className="App">
               <h2 className="header" style={{ paddingBottom: "10px" }}>Contacts</h2>
-           
               <input
                 type="search"
                 className={"form-control rounded"}
                 placeholder={"Search"}
                 aria-label="Search"
                 aria-describedby="search-addon"
-                onChange={handleSearch}
-                onFocus={saveCopy}
+                onChange={(e)=> {setQuery(e.target.value)}}
+                
               />
-
               <hr></hr>
               {operation === 0 ? <button type="button" className="btn btn-primary" onClick={() => {
                 setShowForm(!showForm)
@@ -158,8 +140,6 @@ const App = () => {
               }>
                 Add
               </button> : null}
-
-
               {showForm && (
                 <div className="container">
                   <form className="form">
@@ -174,7 +154,6 @@ const App = () => {
                           // console.log(e.target.value);
                         }}
                         value={name !== "" ? name : ""}
-
                       />
                     </div>
                     <div className="form-group">
@@ -194,7 +173,6 @@ const App = () => {
                     </button> : <button type="button" className="btn btn-primary" onClick={() => {
                       if (name !== "" && phoneNumber !== "") {
                         addContact();
-                       
                       }
                       else {
                         alert("Please enter the required fields")
@@ -202,7 +180,6 @@ const App = () => {
                     }}>
                       Add
                     </button>}
-
                     {operation > 0 ? <button type="button" className="btn btn-danger ml-2" onClick={() => { setShowForm(false); setOperation(0); setName(""); setPhoneNumber("") }}>
                       Cancel
                     </button> : null}
@@ -210,7 +187,10 @@ const App = () => {
                 </div>
               )}
 
-              {contacts.map((contact) => (
+              {contacts.filter((contact)=>{
+                return contact.name.toLowerCase().includes(query.toLowerCase())
+
+              }).map((contact) => (
                 <div className="contacts" key={contact.number}>
                   <div className="contact-details" >
                     <h5 >{contact.name}</h5>
@@ -221,7 +201,6 @@ const App = () => {
                       <button key={contact.number} id={contact.number} className="icon-holder" onClick={(e) => {
                         setOperation(1);
                         editContact(e)
-                        
                       }}>
                         <i style={{ paddingTop: "5px" }} id={contact.number} className="pen fa fa-pen"></i>
                       </button>
@@ -231,21 +210,15 @@ const App = () => {
                         <i id={contact.number} className="delete fa fa-trash"></i>
                       </button>
                     </div>
-
                   </div>
-
-
-
                   <hr />
                 </div>
               ))}
             </div>
           </div>
-
           <div className="col-md-4"></div>
         </div>
       </div>
- 
     </div>
   );
 };
